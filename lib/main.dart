@@ -10,12 +10,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+      home: Scaffold(
+        body: Center(
+          child: TextButton(
+            onPressed: () async {
+              // TotalDb incomeDb = TotalDb();
+              // print(incomeDb.getAllTotals());
+            }, 
+            child: const Text('test')
+          ),
+        ),
       ),
-      home: const Scaffold(),
     );
   }
 }

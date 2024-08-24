@@ -4,7 +4,7 @@ class Expense {
   final String? currency;
   final String? note;
   final String? createdDate;
-  final ExpenseType? incomeType;
+  final ExpenseType? expenseType;
 
   Expense({
     this.id, 
@@ -12,7 +12,7 @@ class Expense {
     this.currency,
     this.note,
     this.createdDate,
-    this.incomeType
+    this.expenseType
   });
   
   factory Expense.fromMap(Map<String, dynamic> map) => Expense(
@@ -21,7 +21,7 @@ class Expense {
     currency: map['currency'] ?? '',
     note: map['note'] ?? '',
     createdDate: map['createdDate'] ?? '',
-    incomeType: ExpenseType.fromMap(map['incomeType'])
+    expenseType: ExpenseType.fromMap(map['expenseType'])
     );
 }
 

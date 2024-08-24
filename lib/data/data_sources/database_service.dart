@@ -1,3 +1,6 @@
+import 'package:interview_task/data/data_sources/expense_db.dart';
+import 'package:interview_task/data/data_sources/income_db.dart';
+import 'package:interview_task/data/data_sources/total_db.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -20,7 +23,9 @@ class DatabaseService {
   }
   
   Future<void> create (Database database, int version) async {
-    
+    await IncomeDb().createTable(database);
+    await ExpenseDb().createTable(database);
+    await TotalDb().createTable(database);
   }
   
   Future<Database> _initialize() async {
