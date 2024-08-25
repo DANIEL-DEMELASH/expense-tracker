@@ -16,11 +16,21 @@ class Total {
   });
   
   factory Total.fromMap(Map<String, dynamic> map) => Total(
-    id: map['id'] ?? -1,
-    month: map['month'] ?? '',
-    totalIncome: map['totalIncome'] ?? '',
-    totalExpense: map['totalExpense'] ?? '',
-    balance: map['balance'] ?? 0.0,
-    currency: map['currency'] ?? ''
+    id: map['id'] as int?,
+    month: map['month'] as String?,
+    totalIncome: map['totalIncome'] as double?,
+    totalExpense: map['totalExpense'] as double?,
+    balance: map['balance'] as double?,
+    currency: map['currency'] as String?
   );
+  
+  Map<String, dynamic> toMap() {
+      return {
+        'month' : month,
+        'totalIncome' : totalIncome,
+        'totalExpense' : totalExpense,
+        'balance' : balance,
+        'currency' : currency,
+      };
+    }
 }

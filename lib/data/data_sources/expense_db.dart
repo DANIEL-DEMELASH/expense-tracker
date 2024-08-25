@@ -31,9 +31,34 @@ class ExpenseDb {
     );
   }
   
-  Future<List<Expense>> getAllExpense() async {
+  Future<int> createExpense ({required Expense expense}) async {
+    final database = await DatabaseService().database;
+    return await database.insert(tableName, expense.toMap());
+  }
+  
+  Future<int> createExpenseType ({required ExpenseType expenseType}) async {
+    final database = await DatabaseService().database;
+    return await database.insert(tableName2, {
+      'name' : expenseType.name,
+    });
+  }
+  
+  Future<List<Expense>> getAllExpenseWithTypes() async {
     final Database database = await DatabaseService().database;
-    final expensesList = await database.query(tableName);
+    final expensesList = await database.rawQuery(
+      '''
+        SELECT expense.*, expenseType.name AS expenseTypeName
+        FROM $tableName
+        INNER JOIN $tableName2
+        ON expense.expenseType = expenseType.id 
+      '''
+    );
     return expensesList.map((expense) => Expense.fromMap(expense)).toList();
+  }
+  
+  Future<List<ExpenseType>> getExpenseTypes() async {
+    final Database database = await DatabaseService().database;
+    final expenseTypes = await database.query(tableName2);
+    return expenseTypes.map((expenseType) => ExpenseType.fromMap(expenseType)).toList();
   }
 }

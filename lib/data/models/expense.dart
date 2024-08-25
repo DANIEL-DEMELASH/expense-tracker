@@ -4,7 +4,8 @@ class Expense {
   final String? currency;
   final String? note;
   final String? createdDate;
-  final ExpenseType? expenseType;
+  final int? expenseType;
+  final String? expenseTypeName;
 
   Expense({
     this.id, 
@@ -12,24 +13,42 @@ class Expense {
     this.currency,
     this.note,
     this.createdDate,
-    this.expenseType
+    this.expenseType,
+    this.expenseTypeName
   });
   
   factory Expense.fromMap(Map<String, dynamic> map) => Expense(
-    id: map['id'] ?? -1,
-    amount: map['amount'] ?? 0.0,
-    currency: map['currency'] ?? '',
-    note: map['note'] ?? '',
-    createdDate: map['createdDate'] ?? '',
-    expenseType: ExpenseType.fromMap(map['expenseType'])
+    id: map['id'] as int?,
+    amount: map['amount'] as double,
+    currency: map['currency'] as String,
+    note: map['note'] as String?,
+    createdDate: map['createdDate'] as String,
+    expenseType: map['expenseType'] as int,
+    expenseTypeName: map['expenseTypeName'] as String?
     );
+    
+    Map<String, dynamic> toMap() {
+      return {
+        'amount' : amount,
+        'currency' : currency,
+        'note' : note,
+        'createdDate' : createdDate,
+        'expenseType' : expenseType
+      };
+    }
 }
 
 class ExpenseType {
   final int? id;
   final String? name;
 
-  ExpenseType({required this.id, required this.name});
+  ExpenseType({this.id, this.name});
   
   factory ExpenseType.fromMap(Map<String, dynamic> map) => ExpenseType(id: map['id'] ?? -1, name: map['name'] ?? '');
+  
+  Map<String, dynamic> toMap() {
+    return {
+      'name' : name
+    };
+  }
 }

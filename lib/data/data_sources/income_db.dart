@@ -31,9 +31,34 @@ class IncomeDb {
     );
   }
   
-  Future<List<Income>> getAllIncome () async {
+  Future<int> createIncomeType ({required IncomeType incomeType}) async {
     final Database database = await DatabaseService().database;
-    final incomesList = await database.query(tableName);
+    return await database.insert(tableName2, {
+      'name' : incomeType.name
+    });
+  }
+  
+  Future<int> createIncome ({required Income income}) async {
+    final Database database = await DatabaseService().database;
+    return await database.insert(tableName, income.toMap());
+  }
+    
+  Future<List<Income>> getAllIncomeWithTypes() async {
+    final Database database = await DatabaseService().database;
+    final incomesList = await database.rawQuery(
+      '''
+        SELECT income.*, incomeType.name AS incomeTypeName
+        FROM $tableName
+        INNER JOIN $tableName2
+        ON income.incomeType = incomeType.id 
+      '''
+    );
     return incomesList.map((income) => Income.fromMap(income)).toList();
+  }
+  
+  Future<List<IncomeType>> getIncomeTypes() async {
+    final Database database = await DatabaseService().database;
+    final incomeTypes = await database.query(tableName2);
+    return incomeTypes.map((incomeType) => IncomeType.fromMap(incomeType)).toList();
   }
 }

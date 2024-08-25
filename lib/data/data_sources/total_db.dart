@@ -19,6 +19,11 @@ class TotalDb {
       '''
     );
   }
+  
+  Future<int> create ({required Total total}) async {
+    final Database database = await DatabaseService().database;
+    return await database.insert(tableName, total.toMap());
+  }
 
   Future<List<Total>> getAllTotals() async {
     final Database database = await DatabaseService().database;
