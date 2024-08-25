@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:interview_task/data/data_sources/expense_db.dart';
-import 'package:interview_task/data/data_sources/income_db.dart';
-import 'package:interview_task/data/data_sources/total_db.dart';
-import 'package:interview_task/data/models/expense.dart';
-import 'package:interview_task/data/models/income.dart';
+import 'package:interview_task/data/data_sources/remote/api_provider.dart';
+// import 'package:interview_task/data/data_sources/expense_db.dart';
+// import 'package:interview_task/data/data_sources/income_db.dart';
+// import 'package:interview_task/data/data_sources/total_db.dart';
+// import 'package:interview_task/data/models/expense.dart';
+// import 'package:interview_task/data/models/income.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -21,15 +22,20 @@ class MyApp extends StatelessWidget {
             children: [
               TextButton(
                 onPressed: () async {
-                  final result = IncomeDb();
+                  ApiProvider apiProvider = ApiProvider();
+                  final result = await apiProvider.getData();
+                  for(int i = 0; i < result!.data.length; i++){
+                    debugPrint('${result.data.keys.elementAt(i)} ${result.data.values.elementAt(i)}'); 
+                  }
+                  // final result = IncomeDb();
                   // result.createIncomeType(incomeType: IncomeType(name: 'salary'));
-                  result.createIncome(income: Income(
-                    amount: 999,
-                    currency: 'ETB',
-                    note: '',
-                    createdDate: '2024-09',
-                    incomeType: 1
-                  ));
+                  // result.createIncome(income: Income(
+                  //   amount: 999,
+                  //   currency: 'ETB',
+                  //   note: '',
+                  //   createdDate: '2024-09',
+                  //   incomeType: 1
+                  // ));
                   // print(await result.updateIncome(income: Income(
                   //   amount: 2500,
                   //   currency: 'ETB',
@@ -45,15 +51,15 @@ class MyApp extends StatelessWidget {
               
               TextButton(
                 onPressed: () async {
-                  final result = ExpenseDb();
+                  // final result = ExpenseDb();
                   // result.createExpenseType(expenseType: ExpenseType(name: 'transport'));
-                  result.createExpense(expense: Expense(
-                    amount: 999,
-                    currency: 'ETB',
-                    note: '',
-                    createdDate: '2024-09',
-                    expenseType: 1
-                  ));
+                  // result.createExpense(expense: Expense(
+                  //   amount: 999,
+                  //   currency: 'ETB',
+                  //   note: '',
+                  //   createdDate: '2024-09',
+                  //   expenseType: 1
+                  // ));
                   // print(await result.updateExpense(expense: Expense(
                   //   amount: 2500,
                   //   currency: 'ETB',
@@ -71,24 +77,24 @@ class MyApp extends StatelessWidget {
               
               TextButton(
                 onPressed: () async {
-                  final result = TotalDb();
-                  result.deleteAllRecords();
-                  final resultsList = await result.getAllTotals();
-                  print('${resultsList.length} record found');
+                  // final result = TotalDb();
+                  // result.deleteAllRecords();
+                  // final resultsList = await result.getAllTotals();
+                  // print('${resultsList.length} record found');
                 }, 
                 child: const Text('delete')
               ),
               
               TextButton(
                 onPressed: () async {
-                  final result = ExpenseDb();
-                  final resultsList = await result.getAllExpenseWithTypes();
-                  print('${resultsList.length} record found');
-                  for(int i = 0; i < resultsList.length; i++){
-                    print('balance = ${resultsList[i].amount}');
-                    print('total income = ${resultsList[i].createdDate}');
+                  // final result = ExpenseDb();
+                  // final resultsList = await result.getAllExpenseWithTypes();
+                  // print('${resultsList.length} record found');
+                  // for(int i = 0; i < resultsList.length; i++){
+                  //   print('balance = ${resultsList[i].amount}');
+                  //   print('total income = ${resultsList[i].createdDate}');
                     // print('total expense = ${resultsList[i].totalExpense}');
-                  }
+                  // }
                 }, 
                 child: const Text('display')
               ),
@@ -107,11 +113,11 @@ class MyApp extends StatelessWidget {
                   // for(int i = 0; i < resultsList.length; i++){
                   //   print('month - ${resultsList[i].incomeTypeName}');
                   // }
-                  final result  = TotalDb();
-                  final resultsList = await result.getDistinctMonths();
-                  for(int i = 0; i < resultsList.length; i++){
-                    print('month - ${resultsList[i]}');
-                  }
+                  // final result  = TotalDb();
+                  // final resultsList = await result.getDistinctMonths();
+                  // for(int i = 0; i < resultsList.length; i++){
+                  //   print('month - ${resultsList[i]}');
+                  // }
                 }, 
                 child: const Text('month lists')
               ),

@@ -1,5 +1,5 @@
-import 'package:interview_task/data/data_sources/database_service.dart';
-import 'package:interview_task/data/data_sources/total_db.dart';
+import 'package:interview_task/data/data_sources/local/database_service.dart';
+import 'package:interview_task/data/data_sources/local/total_db.dart';
 import 'package:interview_task/data/models/expense.dart';
 import 'package:sqflite/sqflite.dart';
 

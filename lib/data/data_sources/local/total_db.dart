@@ -1,4 +1,4 @@
-import 'package:interview_task/data/data_sources/database_service.dart';
+import 'package:interview_task/data/data_sources/local/database_service.dart';
 import 'package:interview_task/data/models/expense.dart';
 import 'package:interview_task/data/models/income.dart';
 import 'package:interview_task/data/models/total.dart';

@@ -1,6 +1,6 @@
-import 'package:interview_task/data/data_sources/expense_db.dart';
-import 'package:interview_task/data/data_sources/income_db.dart';
-import 'package:interview_task/data/data_sources/total_db.dart';
+import 'package:interview_task/data/data_sources/local/expense_db.dart';
+import 'package:interview_task/data/data_sources/local/income_db.dart';
+import 'package:interview_task/data/data_sources/local/total_db.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
