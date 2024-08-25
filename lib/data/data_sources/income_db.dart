@@ -1,4 +1,5 @@
 import 'package:interview_task/data/data_sources/database_service.dart';
+import 'package:interview_task/data/data_sources/total_db.dart';
 import 'package:interview_task/data/models/income.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -40,7 +41,9 @@ class IncomeDb {
   
   Future<int> createIncome ({required Income income}) async {
     final Database database = await DatabaseService().database;
-    return await database.insert(tableName, income.toMap());
+    final totalDb = TotalDb();
+    await database.insert(tableName, income.toMap());
+    return await totalDb.updateIncome(income: income);
   }
     
   Future<List<Income>> getAllIncomeWithTypes() async {

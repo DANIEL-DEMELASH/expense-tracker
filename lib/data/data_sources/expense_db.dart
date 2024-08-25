@@ -1,4 +1,5 @@
 import 'package:interview_task/data/data_sources/database_service.dart';
+import 'package:interview_task/data/data_sources/total_db.dart';
 import 'package:interview_task/data/models/expense.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -33,7 +34,9 @@ class ExpenseDb {
   
   Future<int> createExpense ({required Expense expense}) async {
     final database = await DatabaseService().database;
-    return await database.insert(tableName, expense.toMap());
+    final totaldb = TotalDb();
+    await database.insert(tableName, expense.toMap());
+    return await totaldb.updateExpense(expense: expense);
   }
   
   Future<int> createExpenseType ({required ExpenseType expenseType}) async {
