@@ -61,4 +61,20 @@ class IncomeDb {
     final incomeTypes = await database.query(tableName2);
     return incomeTypes.map((incomeType) => IncomeType.fromMap(incomeType)).toList();
   }
+  
+  Future<List<Income>> getIncomeWithTypesByMonth(String month) async {
+    final Database database = await DatabaseService().database;
+    final incomesList = await database.rawQuery(
+      '''
+        SELECT income.*, incomeType.name AS incomeTypeName
+        FROM $tableName
+        INNER JOIN $tableName2
+        ON income.incomeType = incomeType.id 
+        WHERE income.createdDate = ?
+      ''',
+      [month]
+    );
+    return incomesList.map((income) => Income.fromMap(income)).toList();
+  }
+  
 }

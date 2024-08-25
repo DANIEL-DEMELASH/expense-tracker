@@ -61,4 +61,22 @@ class ExpenseDb {
     final expenseTypes = await database.query(tableName2);
     return expenseTypes.map((expenseType) => ExpenseType.fromMap(expenseType)).toList();
   }
+  
+  Future<List<Expense>> getExpenseWithTypesByMonth(String month) async {
+    final Database database = await DatabaseService().database;
+
+    final List<Map<String, dynamic>> expensesList = await database.rawQuery(
+      '''
+        SELECT expense.*, expenseType.name AS expenseTypeName
+        FROM $tableName AS expense
+        INNER JOIN $tableName2 AS expenseType
+        ON expense.expenseType = expenseType.id
+        WHERE expense.createdDate = ?
+      ''',
+      [month],
+    );
+
+    return expensesList.map((expense) => Expense.fromMap(expense)).toList();
+  }
+
 }
