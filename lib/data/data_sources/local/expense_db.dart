@@ -1,85 +1,86 @@
 import 'package:interview_task/data/data_sources/local/database_service.dart';
 import 'package:interview_task/data/data_sources/local/total_db.dart';
 import 'package:interview_task/data/models/expense.dart';
+import 'package:interview_task/data/models/total.dart';
 import 'package:sqflite/sqflite.dart';
 
 class ExpenseDb {
-  final tableName = 'expense';
-  final tableName2 = 'expenseType';
-  
+  final String tableName = 'expense';
+  final String tableName2 = 'expenseType';
+
   Future<void> createTable(Database database) async {
-    await database.execute(
-      '''
+    await database.execute('''
       CREATE TABLE IF NOT EXISTS $tableName2 (
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         name TEXT NOT NULL
       )
-      '''
-    );
-    
-    await database.execute(
-      '''
+    ''');
+
+    await database.execute('''
       CREATE TABLE IF NOT EXISTS $tableName (
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         amount REAL NOT NULL,
         currency TEXT NOT NULL,
         note TEXT,
         createdDate TEXT NOT NULL,
-        expenseType INTEGER,  -- Define the foreign key column
+        expenseType INTEGER,
         FOREIGN KEY (expenseType) REFERENCES $tableName2 (id)
       )
+    ''');
+    
+     await database.rawInsert(
       '''
+      INSERT INTO $tableName2 (name) VALUES (?)
+      ''',
+      ['Food']
+    );
+
+    await database.rawInsert(
+      '''
+      INSERT INTO $tableName (amount, currency, note, createdDate, expenseType) VALUES (?, ?, ?, ?, ?)
+      ''',
+      [100.0, 'USD', 'Grocery shopping', '2024-08-28', 1]
     );
   }
-  
-  Future<int> createExpense ({required Expense expense}) async {
-    final database = await DatabaseService().database;
-    final totaldb = TotalDb();
+
+  Future<int> createExpense({required Expense expense}) async {
+    final Database database = await DatabaseService().database;
+    final TotalDb totalDb = TotalDb();
+    
     await database.insert(tableName, expense.toMap());
-    return await totaldb.updateExpense(expense: expense);
+    return totalDb.updateExpense(expense: expense);
   }
-  
-  Future<int> createExpenseType ({required ExpenseType expenseType}) async {
-    final database = await DatabaseService().database;
-    return await database.insert(tableName2, {
-      'name' : expenseType.name,
-    });
+
+  Future<int> createExpenseType({required ExpenseType expenseType}) async {
+    final Database database = await DatabaseService().database;
+    return database.insert(tableName2, expenseType.toMap());
   }
-  
+
   Future<List<Expense>> getAllExpenseWithTypes() async {
     final Database database = await DatabaseService().database;
-    final expensesList = await database.rawQuery(
-      '''
-        SELECT expense.*, expenseType.name AS expenseTypeName
-        FROM $tableName
-        INNER JOIN $tableName2
-        ON expense.expenseType = expenseType.id 
-      '''
-    );
+    final List<Map<String, dynamic>> expensesList = await database.rawQuery('''
+      SELECT expense.*, expenseType.name AS expenseTypeName
+      FROM $tableName
+      INNER JOIN $tableName2 ON expense.expenseType = expenseType.id
+    ''');
+    
     return expensesList.map((expense) => Expense.fromMap(expense)).toList();
   }
-  
+
   Future<List<ExpenseType>> getExpenseTypes() async {
     final Database database = await DatabaseService().database;
-    final expenseTypes = await database.query(tableName2);
+    final List<Map<String, dynamic>> expenseTypes = await database.query(tableName2);
+    
     return expenseTypes.map((expenseType) => ExpenseType.fromMap(expenseType)).toList();
   }
-  
-  Future<List<Expense>> getExpenseWithTypesByMonth(String month) async {
-    final Database database = await DatabaseService().database;
 
-    final List<Map<String, dynamic>> expensesList = await database.rawQuery(
-      '''
-        SELECT expense.*, expenseType.name AS expenseTypeName
-        FROM $tableName AS expense
-        INNER JOIN $tableName2 AS expenseType
-        ON expense.expenseType = expenseType.id
-        WHERE expense.createdDate = ?
-      ''',
-      [month],
-    );
+  Future<List<Expense>> getExpenseWithTypesByMonth(int id) async {
+    final TotalDb totalDb = TotalDb();
+    final Total total = await totalDb.getById(id);
+    final String formattedDate = total.month!;
+    final List<Expense> expensesList = await getAllExpenseWithTypes();
 
-    return expensesList.map((expense) => Expense.fromMap(expense)).toList();
+    return expensesList.where((expense) => expense.createdDate == formattedDate).toList();
   }
 
 }
