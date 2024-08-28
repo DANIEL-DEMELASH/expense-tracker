@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -50,15 +51,21 @@ class _AddIncomePageState extends State<AddIncomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          onPressed: (){
+            Navigator.pop(context);
+          }, 
+          icon: const Icon(CupertinoIcons.chevron_back)
+        ),
         title: const Text('New Income'),
       ),
       
       body: BlocListener<LocalBloc, LocalState>(
         listener: (context, state){
-          if(state is LoadedExpenseTypes){
           
-          }
       },
       child: BlocBuilder<LocalBloc, LocalState>(builder: (context, state){
         if(state is LoadedIncomeTypes){
@@ -67,74 +74,128 @@ class _AddIncomePageState extends State<AddIncomePage> {
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: Column(
               children: [
+                const SizedBox(height: 30),
+                
                 TextField(
                   controller: _dateController,
                   readOnly: true,
                   onTap: () => _selectDate(context),
-                  decoration: const InputDecoration(
-                    labelText: 'Select Date',
+                  decoration: InputDecoration(
+                    labelText: 'Month',
                     hintText: 'YYYY-MM',
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8)
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8)
+                    ),
                   ),
                 ),
+                
                 const SizedBox(height: 30,),
+                
                 TextField(
                   controller: _amountController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true), // Sets the keyboard type to number
                   inputFormatters: <TextInputFormatter>[
                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
                   ],
-                  decoration: const InputDecoration(
-                    labelText: 'Enter Number',
-                    hintText: 'Enter a number',
+                  decoration: InputDecoration(
+                    labelText: 'Amount',
+                    hintText: 'amount',
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8)
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8)
+                    ),
                   ),
-                  onChanged: (value) {
-                    // Handle changes if needed
-                    print('Number entered: $value');
-                  },
                 ),
+                
                 const SizedBox(height: 20),
-                 TextField(
+                
+                TextField(
                   controller: _noteController,
-                  maxLines: 5, // Allows the TextField to expand vertically based on content
-                  decoration: const InputDecoration(
-                    labelText: 'Enter text',
-                    hintText: 'Enter multiple lines of text',
-                    border: OutlineInputBorder(),
+                  maxLines: 5,
+                  // minLines: 3,
+                  textAlign: TextAlign.start,
+                  decoration: InputDecoration(
+                    labelText: 'Note',
+                    hintText: 'note',
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8)
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8)
+                    ),
                   ),
                 ),
                 
                 const SizedBox(height: 30,),
                 
-                DropdownButton<String>(
-                  value: selectedExpenseType,
-                  hint: const Text('select income type'),
-                  items: state.incomeTypes.map((expense) {
-                              
-                    return DropdownMenuItem<String>(
-                      value: expense.id.toString(),
-                      child: Text(expense.name.toString()),
-                    );
-                  }).toList(),
-                  
-                  onChanged: (String? newKey) {
-                    setState(() {
-                      selectedExpenseType = newKey!;
-                    });
-                  },
+                Container(
+                  height: 55,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8)
+                  ),
+                  child: DropdownButton<String>(
+                    value: selectedExpenseType,
+                    hint: const Text('Income Type'),
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    dropdownColor: Colors.white,
+                    items: state.incomeTypes.map((expense) {
+                                
+                      return DropdownMenuItem<String>(
+                        value: expense.id.toString(),
+                        child: Text(expense.name.toString()),
+                      );
+                    }).toList(),
+                    
+                    onChanged: (String? newKey) {
+                      setState(() {
+                        selectedExpenseType = newKey!;
+                      });
+                    },
+                  ),
                 ),
                   
                 const SizedBox(height: 30,),
                 
-                ElevatedButton(onPressed: (){
-                  context.read<LocalBloc>().add(AddIncome(income: Income(
-                    amount: double.parse(_amountController.text),
-                    currency: 'ETB',
-                    note: _noteController.text,
-                    createdDate: _dateController.text,
-                    incomeType: int.parse(selectedExpenseType!)
-                  )));
-                  Navigator.pop(context);
-                }, child: Text('submit'))          
+                TextButton(
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 12, 
+                    vertical: MediaQuery.of(context).size.width / 30),
+                    backgroundColor: Colors.white,
+                    side: const BorderSide(color: Colors.grey)
+                  ),
+                  onPressed: (){
+                    if(_amountController.text.isEmpty || _noteController.text.isEmpty || _dateController.text.isEmpty || selectedExpenseType == null){
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error: All inputs must be filled', style: TextStyle(color: Colors.red),), backgroundColor: Colors.white,));
+                    }else{
+                      context.read<LocalBloc>().add(AddIncome(income: Income(
+                        amount: double.parse(_amountController.text),
+                        currency: 'ETB',
+                        note: _noteController.text,
+                        createdDate: _dateController.text,
+                        incomeType: int.parse(selectedExpenseType!)
+                      )));
+                      Navigator.pop(context);
+                    }   
+                  }, 
+                  child: const Text('Save', 
+                    style: TextStyle(
+                        fontSize: 18.0,
+                        color: Colors.black))
+                  )
                   
               ],
             ),

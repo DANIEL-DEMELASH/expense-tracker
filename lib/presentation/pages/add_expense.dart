@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,26 +32,33 @@ class _AddExpenseState extends State<AddExpensePage> {
   }
   
     Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
+      final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2101),
+      );
 
-    if (picked != null) {
-      setState(() {
-        // Format the selected date to 'YYYY-MM'
-        _dateController.text = DateFormat('MMMM yyyy').format(picked);
-      });
-    }
+      if (picked != null) {
+        setState(() {
+          _dateController.text = DateFormat('MMMM yyyy').format(picked);
+        });
+      }
   }
   
   
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          onPressed: (){
+            Navigator.pop(context);
+          }, 
+          icon: const Icon(CupertinoIcons.chevron_back)
+        ),
         title: const Text('New Expense'),
       ),
       
@@ -62,78 +70,145 @@ class _AddExpenseState extends State<AddExpensePage> {
       },
       child: BlocBuilder<LocalBloc, LocalState>(builder: (context, state){
         if(state is LoadedExpenseTypes){
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Column(
-            children: [
-              TextField(
-                controller: _dateController,
-                readOnly: true,
-                onTap: () => _selectDate(context),
-                decoration: const InputDecoration(
-                  labelText: 'Select Date',
-                  hintText: 'YYYY-MM',
-                ),
-              ),
-              const SizedBox(height: 30,),
-              TextField(
-                controller: _amountController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true), // Sets the keyboard type to number
-                inputFormatters: <TextInputFormatter>[
-                   FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
-                ],
-                decoration: const InputDecoration(
-                  labelText: 'Enter Number',
-                  hintText: 'Enter a number',
-                ),
-               
-              ),
-              const SizedBox(height: 20),
-               TextField(
-                controller: _noteController,
-                maxLines: 5, // Allows the TextField to expand vertically based on content
-                decoration: const InputDecoration(
-                  labelText: 'Enter text',
-                  hintText: 'Enter multiple lines of text',
-                  border: OutlineInputBorder(),
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Column(
+              children: [
+                const SizedBox(height: 30),
+                
+                TextField(
+                  controller: _dateController,
+                  readOnly: true,
+                  onTap: () => _selectDate(context),
+                  decoration: InputDecoration(
+                    labelText: 'Month',
+                    hintText: 'YYYY-MM',
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8)
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8)
+                    ),
+                  ),
                 ),
                 
-              ),
-              
-              const SizedBox(height: 30,),
-              
-              DropdownButton<String>(
-                value: selectedExpenseType,
-                hint: const Text('select expense type'),
-                items: state.expenseTypes.map((expense) {
-                            
-                  return DropdownMenuItem<String>(
-                    value: expense.id.toString(),
-                    child: Text(expense.name.toString()),
-                  );
-                }).toList(),
+                const SizedBox(height: 30,),
                 
-                onChanged: (String? newKey) {
-                  setState(() {
-                    selectedExpenseType = newKey!;
-                  });
-                },
-              ),
+                TextField(
+                  controller: _amountController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true), // Sets the keyboard type to number
+                  inputFormatters: <TextInputFormatter>[
+                     FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                  ],
+                  decoration: InputDecoration(
+                    labelText: 'Amount',
+                    hintText: 'amount',
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8)
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8)
+                    ),
+                  ),
+                 
+                ),
                 
-              const SizedBox(height: 30,),
-              
-              ElevatedButton(onPressed: (){
-                context.read<LocalBloc>().add(AddExpense(expense: Expense(
-                  amount: double.parse(_amountController.text),
-                  currency: 'ETB',
-                  note: _noteController.text,
-                  createdDate: _dateController.text,
-                  expenseType: int.parse(selectedExpenseType!)
-                )));
-                Navigator.pop(context);
-              }, child: Text('submit'))          
+                const SizedBox(height: 20),
                 
-            ],
+                 TextField(
+                  controller: _noteController,
+                  maxLines: 5,
+                  decoration: InputDecoration(
+                    labelText: 'note',
+                    hintText: 'note',
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8.0)
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8)
+                    ),
+                    
+                  ),
+                  
+                ),
+                
+                const SizedBox(height: 30,),
+                
+                Container(
+                  height: 55,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8)
+                  ),
+                  child: DropdownButton<String>(
+                    value: selectedExpenseType,
+                    hint: const Text('Expense Type'),
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    dropdownColor: Colors.white,
+                    items: state.expenseTypes.map((expense) {
+                                
+                      return DropdownMenuItem<String>(
+                        value: expense.id.toString(),
+                        child: Text(expense.name.toString()),
+                      );
+                    }).toList(),
+                    
+                    onChanged: (String? newKey) {
+                      setState(() {
+                        selectedExpenseType = newKey!;
+                      });
+                    },
+                  ),
+                ),
+                  
+                const SizedBox(height: 50),
+                
+                TextButton(
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 12, 
+                    vertical: MediaQuery.of(context).size.width / 30),
+                    backgroundColor: Colors.white,
+                    side: const BorderSide(color: Colors.grey)
+                  ),
+                  onPressed: (){
+                    if(_amountController.text.isEmpty || 
+                      _noteController.text.isEmpty || 
+                      _dateController.text.isEmpty || 
+                      selectedExpenseType == null){
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Error: All inputs must be filled', 
+                              style: TextStyle(color: Colors.red)
+                            ), 
+                            backgroundColor: Colors.white,));
+                    }else{
+                      context.read<LocalBloc>().add(AddExpense(expense: Expense(
+                        amount: double.parse(_amountController.text),
+                        currency: 'ETB',
+                        note: _noteController.text,
+                        createdDate: _dateController.text,
+                        expenseType: int.parse(selectedExpenseType!)
+                      )));
+                      Navigator.pop(context);
+                    }    
+                  }, 
+                  child: const Text('Save', 
+                    style: TextStyle(
+                        fontSize: 18.0,
+                        color: Colors.black))
+                  )
+                  
+              ],
+            ),
           ),
         );}
         return Container();
