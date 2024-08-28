@@ -94,8 +94,8 @@ class LocalBloc extends Bloc<LocalEvent, LocalState> {
       }else{
         emit(ErrorState(error: 'error saving expense type'));  
       }
-      final result2 = await _totalDb.getAllTotals();  
-      emit(LoadedTotalList(totalLists: result2)); 
+      final result2 = await _expenseDb.getExpenseTypes();  
+      emit(LoadedExpenseTypes(expenseTypes: result2)); 
     } catch (e) {
       emit(ErrorState(error: 'error saving expense type $e'));
     }

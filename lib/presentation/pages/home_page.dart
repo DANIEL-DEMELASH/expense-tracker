@@ -79,6 +79,7 @@ double calculateTotalExpenseAmount(List<Expense> expenseList) {
   return totalAmount;
 }
 
+
   
   @override
   Widget build(BuildContext context) {

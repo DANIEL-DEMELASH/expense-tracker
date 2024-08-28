@@ -20,6 +20,7 @@ class _AddIncomePageState extends State<AddIncomePage> {
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
+  final TextEditingController _textFieldController = TextEditingController();
   
   String? selectedExpenseType;
   List<ExpenseType>? expenseTypes;
@@ -146,25 +147,86 @@ class _AddIncomePageState extends State<AddIncomePage> {
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(8)
                   ),
-                  child: DropdownButton<String>(
-                    value: selectedExpenseType,
-                    hint: const Text('Income Type'),
-                    isExpanded: true,
-                    underline: const SizedBox(),
-                    dropdownColor: Colors.white,
-                    items: state.incomeTypes.map((expense) {
-                                
-                      return DropdownMenuItem<String>(
-                        value: expense.id.toString(),
-                        child: Text(expense.name.toString()),
-                      );
-                    }).toList(),
-                    
-                    onChanged: (String? newKey) {
-                      setState(() {
-                        selectedExpenseType = newKey!;
-                      });
-                    },
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButton<String>(
+                          value: selectedExpenseType,
+                          hint: const Text('Income Type'),
+                          isExpanded: true,
+                          underline: const SizedBox(),
+                          dropdownColor: Colors.white,
+                          items: state.incomeTypes.map((expense) {
+                                      
+                            return DropdownMenuItem<String>(
+                              value: expense.id.toString(),
+                              child: Text(expense.name.toString()),
+                            );
+                          }).toList(),
+                          
+                          onChanged: (String? newKey) {
+                            setState(() {
+                              selectedExpenseType = newKey!;
+                            });
+                          },
+                        ),
+                      ),
+                      
+                      TextButton(onPressed: (){
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return BlocProvider(
+                              create: (context) => LocalBloc(),
+                              child: BlocBuilder<LocalBloc, LocalState>(
+                                builder: (context, state ){
+                                  return AlertDialog(
+                                  title: const Text('New Income Type'),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)
+                                  ),
+                                  content: TextField(
+                                    controller: _textFieldController,
+                                    decoration: InputDecoration(
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: const BorderSide(color: Colors.grey),
+                                        borderRadius: BorderRadius.circular(8)
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: const BorderSide(color: Colors.grey),
+                                        borderRadius: BorderRadius.circular(8)
+                                      ),
+                                    ),
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text('Cancel'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    
+                                    TextButton(
+                                      child: const Text('Save'),
+                                      onPressed: () {
+                                        if(_textFieldController.text.length > 2){
+                                          context.read<LocalBloc>().add(AddIncomeType(incomeType: IncomeType(name: _textFieldController.text))); 
+                                          Navigator.of(context).pop();
+                                        }else{
+                                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('name must be at least 3 characters')));
+                                        }
+                                        
+                                      },
+                                    ),
+                                  ],
+                                );
+                                }
+                              ),
+                            );
+                          },
+                        );
+                      }, child: const Text('New Type'))
+                    ],
                   ),
                 ),
                   

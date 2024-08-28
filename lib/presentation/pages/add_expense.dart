@@ -19,6 +19,8 @@ class _AddExpenseState extends State<AddExpensePage> {
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
+  final TextEditingController _textFieldController = TextEditingController();
+
   
   String? selectedExpenseType;
   List<ExpenseType>? expenseTypes;
@@ -45,7 +47,7 @@ class _AddExpenseState extends State<AddExpensePage> {
         });
       }
   }
-  
+
   
   @override
   Widget build(BuildContext context) {
@@ -64,8 +66,8 @@ class _AddExpenseState extends State<AddExpensePage> {
       
       body: BlocListener<LocalBloc, LocalState>(
         listener: (context, state){
-          if(state is LoadedExpenseTypes){
-          
+          if(state is ErrorState){
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error)));
           }
       },
       child: BlocBuilder<LocalBloc, LocalState>(builder: (context, state){
@@ -148,25 +150,86 @@ class _AddExpenseState extends State<AddExpensePage> {
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(8)
                   ),
-                  child: DropdownButton<String>(
-                    value: selectedExpenseType,
-                    hint: const Text('Expense Type'),
-                    isExpanded: true,
-                    underline: const SizedBox(),
-                    dropdownColor: Colors.white,
-                    items: state.expenseTypes.map((expense) {
-                                
-                      return DropdownMenuItem<String>(
-                        value: expense.id.toString(),
-                        child: Text(expense.name.toString()),
-                      );
-                    }).toList(),
-                    
-                    onChanged: (String? newKey) {
-                      setState(() {
-                        selectedExpenseType = newKey!;
-                      });
-                    },
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButton<String>(
+                          value: selectedExpenseType,
+                          hint: const Text('Expense Type'),
+                          isExpanded: true,
+                          underline: const SizedBox(),
+                          dropdownColor: Colors.white,
+                          items: state.expenseTypes.map((expense) {
+                                      
+                            return DropdownMenuItem<String>(
+                              value: expense.id.toString(),
+                              child: Text(expense.name.toString()),
+                            );
+                          }).toList(),
+                          
+                          onChanged: (String? newKey) {
+                            setState(() {
+                              selectedExpenseType = newKey!;
+                            });
+                          },
+                        ),
+                      ),
+                      
+                      TextButton(onPressed: (){
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return BlocProvider(
+                              create: (context) => LocalBloc(),
+                              child: BlocBuilder<LocalBloc, LocalState>(
+                                builder: (context, state ){
+                                  return AlertDialog(
+                                  title: const Text('New Expense Type'),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)
+                                  ),
+                                  content: TextField(
+                                    controller: _textFieldController,
+                                    decoration: InputDecoration(
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: const BorderSide(color: Colors.grey),
+                                        borderRadius: BorderRadius.circular(8)
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: const BorderSide(color: Colors.grey),
+                                        borderRadius: BorderRadius.circular(8)
+                                      ),
+                                    ),
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text('Cancel'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    
+                                    TextButton(
+                                      child: const Text('Save'),
+                                      onPressed: () {
+                                        if(_textFieldController.text.length > 2){
+                                          context.read<LocalBloc>().add(AddExpenseType(expenseType: ExpenseType(name: _textFieldController.text))); 
+                                          Navigator.of(context).pop();
+                                        }else{
+                                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('name must be at least 3 characters')));
+                                        }
+                                        
+                                      },
+                                    ),
+                                  ],
+                                );
+                                }
+                              ),
+                            );
+                          },
+                        );
+                      }, child: const Text('New Type'))
+                    ],
                   ),
                 ),
                   
