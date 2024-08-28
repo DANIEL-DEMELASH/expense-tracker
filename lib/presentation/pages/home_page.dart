@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     for (var income in incomeList) {
       if (income.amount != null && income.incomeTypeName != null) {
-        String key = '${income.id} ${income.incomeTypeName!}';
+        String key = income.incomeTypeName!;
         incomeMap[key] = income.amount!;
       }
     }
@@ -54,7 +54,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     for (var expense in expenseList) {
       if (expense.amount != null) {
-        String key = '${expense.id} ${expense.expenseTypeName}';
+        String key = '${expense.expenseTypeName}';
         expenseMap[key] = expense.amount!;
       }
     }

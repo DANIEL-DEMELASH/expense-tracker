@@ -47,7 +47,29 @@ class ExpenseDb {
     final Database database = await DatabaseService().database;
     final TotalDb totalDb = TotalDb();
     
-    await database.insert(tableName, expense.toMap());
+    bool recordExists = false;
+    
+    final List<Expense> allExpenses = await getAllExpenseWithTypes();
+    for(var ex in allExpenses){
+     if(ex.createdDate == expense.createdDate && ex.expenseType == expense.expenseType){
+      
+      await database.rawUpdate('''
+        UPDATE $tableName 
+        SET 
+          amount = amount + ?
+        WHERE createdDate = ? AND expenseType = ?
+        ''', 
+        [expense.amount, expense.createdDate, expense.expenseType]);
+
+      recordExists = true;
+      break;
+     }
+     
+    }
+    
+    if(!recordExists){
+      await database.insert(tableName, expense.toMap());  
+    }
     return totalDb.updateExpense(expense: expense);
   }
 

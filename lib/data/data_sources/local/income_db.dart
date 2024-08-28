@@ -51,8 +51,29 @@ class IncomeDb {
   Future<int> createIncome({required Income income}) async {
     final Database database = await DatabaseService().database;
     final TotalDb totalDb = TotalDb();
+    bool recordExists = false;
     
-    await database.insert(tableName, income.toMap());
+    final List<Income> allIncomes = await getAllIncomeWithTypes();
+    for(var inc in allIncomes){
+     if(inc.createdDate == income.createdDate && inc.incomeType == income.incomeType){
+      
+      await database.rawUpdate('''
+        UPDATE $tableName 
+        SET 
+          amount = amount + ?
+        WHERE createdDate = ? AND incomeType = ?
+        ''', 
+        [income.amount, income.createdDate, income.incomeType]);
+
+      recordExists = true;
+      break;
+     }
+     
+    }
+    
+    if(!recordExists){
+      await database.insert(tableName, income.toMap());  
+    }
     return await totalDb.updateIncome(income: income);
   }
 
