@@ -1,29 +1,3 @@
-// import 'package:interview_task/data/models/total.dart';
-
-// abstract class TotalState {
-//   TotalState();
-// }
-
-// class LoadingTotalList extends TotalState {
-//   LoadingTotalList();
-// }
-
-// class LoadedTotalList extends TotalState {
-//   final List<Total> totals;
-//   LoadedTotalList(this.totals);
-// }
-
-// class LoadedMonthlySummary extends TotalState {
-//   final Total total;
-//   LoadedMonthlySummary(this.total);
-// }
-
-// class ErrorTotalState extends TotalState {
-//   final String message;
-//   ErrorTotalState(this.message);
-// }
-
-
 import 'package:interview_task/data/models/expense.dart';
 import 'package:interview_task/data/models/income.dart';
 import 'package:interview_task/data/models/total.dart';

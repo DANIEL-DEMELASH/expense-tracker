@@ -1,31 +1,3 @@
-// abstract class TotalEvent {
-//   TotalEvent();
-// }
-
-// class GetTotalList extends TotalEvent {
-//   GetTotalList();
-// }
-
-// class GetTotal extends TotalEvent {
-//   final int id;
-//   GetTotal(this.id);
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import 'package:interview_task/data/models/expense.dart';
 import 'package:interview_task/data/models/income.dart';
 

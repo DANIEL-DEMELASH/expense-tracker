@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:interview_task/data/data_sources/local/expense_db.dart';
-import 'package:interview_task/data/data_sources/local/income_db.dart';
-import 'package:interview_task/data/data_sources/local/total_db.dart';
-import 'package:interview_task/data/models/expense.dart';
-import 'package:interview_task/data/models/income.dart';
 import 'package:interview_task/presentation/bloc/local_db_bloc/local_bloc.dart';
 import 'package:interview_task/presentation/bloc/local_db_bloc/local_event.dart';
 import 'package:interview_task/presentation/bloc/remote_bloc/remote_bloc.dart';
