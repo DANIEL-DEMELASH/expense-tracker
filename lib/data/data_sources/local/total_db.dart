@@ -87,7 +87,7 @@ class TotalDb {
           totalIncome: 0.0,
           totalExpense: 0.0,
           balance: 0.0,
-          currency: 'ETB',
+          currency: 'USD',
         ),
       );
     }
