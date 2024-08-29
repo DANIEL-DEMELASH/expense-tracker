@@ -28,7 +28,20 @@ class LocalBloc extends Bloc<LocalEvent, LocalState> {
   Future<void> _onGetTotalList (GetTotalList event, Emitter<LocalState> emit) async {
     try {
       emit(LoadingTotalList());
-      final result = await _totalDb.getAllTotals();
+      var result = await _totalDb.getAllTotals();
+      
+      if(result.isEmpty){
+        // Inserting sample records 
+        IncomeDb incomeDb = IncomeDb();
+        await incomeDb.createIncome(income: Income(amount: 4000, currency: 'USD', note: 'lorem ipsum', createdDate: '2024-08', incomeType: 1));
+        await incomeDb.createIncome(income: Income(amount: 1000, currency: 'USD', note: 'lorem ipsum', createdDate: '2024-08', incomeType: 2));
+        await incomeDb.createIncome(income: Income(amount: 1360, currency: 'USD', note: 'lorem ipsum', createdDate: '2024-08', incomeType: 3));
+        
+        ExpenseDb expenseDb = ExpenseDb();
+        await expenseDb.createExpense(expense: Expense(amount: 300, currency: 'USD', note: 'lorem ipsum', createdDate: '2024-08', expenseType: 1));
+        await expenseDb.createExpense(expense: Expense(amount: 800, currency: 'USD', note: 'lorem ipsum', createdDate: '2024-08', expenseType: 2));
+        result = await _totalDb.getAllTotals();
+      }
       emit(LoadedTotalList(totalLists: result));      
     } catch (e) {
       emit(ErrorState(error: 'error loading total list $e'));

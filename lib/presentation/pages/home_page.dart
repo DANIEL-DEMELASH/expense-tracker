@@ -6,6 +6,8 @@ import 'package:interview_task/data/models/total.dart';
 import 'package:interview_task/presentation/bloc/local_db_bloc/local_bloc.dart';
 import 'package:interview_task/presentation/bloc/local_db_bloc/local_event.dart';
 import 'package:interview_task/presentation/bloc/local_db_bloc/local_state.dart';
+import 'package:interview_task/presentation/bloc/remote_bloc/remote_bloc.dart';
+import 'package:interview_task/presentation/bloc/remote_bloc/remote_state.dart';
 import 'package:interview_task/presentation/pages/add_expense.dart';
 import 'package:interview_task/presentation/pages/add_income.dart';
 import 'package:pie_chart/pie_chart.dart';
@@ -20,6 +22,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   String? selectedMonthID;
   String? selectedMonthName;
+  double selectedCurrency = 1;
   Total? selectedTotal;
   List<Total>? totalList;
   List<Income>? incomeList;
@@ -62,22 +65,22 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
 
-double calculateTotalAmount(List<Income> incomeList) {
-  double totalAmount = 0;
-  for (var income in incomeList) {
-    totalAmount += income.amount ?? 0;
+  double calculateTotalAmount(List<Income> incomeList) {
+    double totalAmount = 0;
+    for (var income in incomeList) {
+      totalAmount += income.amount ?? 0;
+    }
+    return totalAmount;
   }
-  return totalAmount;
-}
 
 
-double calculateTotalExpenseAmount(List<Expense> expenseList) {
-  double totalAmount = 0;
-  for (var expense in expenseList) {
-    totalAmount += expense.amount ?? 0;
+  double calculateTotalExpenseAmount(List<Expense> expenseList) {
+    double totalAmount = 0;
+    for (var expense in expenseList) {
+      totalAmount += expense.amount ?? 0;
+    }
+    return totalAmount;
   }
-  return totalAmount;
-}
 
 
   
@@ -89,6 +92,38 @@ double calculateTotalExpenseAmount(List<Expense> expenseList) {
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: const Text('Monefy Clone'),
+        actions: [
+          BlocListener<RemoteBloc, RemoteState>(
+            listener: (context, state){
+            
+            },
+            child: BlocBuilder<RemoteBloc, RemoteState>(
+              builder: (context, state) {
+                if(state is LoadedCurrencyList){
+                    return DropdownButton<double>(
+                      hint: const Text('USD'),
+                      value: selectedCurrency,
+                      underline: const SizedBox(),
+                      dropdownColor: Colors.white,
+                      onChanged: (double? newValue) {
+                        setState(() {
+                          selectedCurrency = newValue!;
+                          // context.read<LocalBloc>().add(GetTotal(int.parse(selectedMonthID!)));
+                        });
+                      },
+                      items: state.currency.data.entries.map<DropdownMenuItem<double>>((MapEntry<String, double> entry) {
+                        return DropdownMenuItem<double>(
+                          value: entry.value,
+                          child: Text(entry.key), // Displaying both key and value
+                        );
+                      }).toList(),
+                    );
+                }
+                return const CircularProgressIndicator();
+              },
+            )
+          )
+        ],
       ),
       
       body: Padding(
@@ -115,8 +150,7 @@ double calculateTotalExpenseAmount(List<Expense> expenseList) {
                 if(state is LoadedIncome){
                   setState(() {
                     incomeList = state.incomeList;  
-                  });
-                  
+                  }); 
                 }
                 
                  if(state is LoadedExpense){
@@ -162,7 +196,7 @@ double calculateTotalExpenseAmount(List<Expense> expenseList) {
                         context.read<LocalBloc>().add(GetIncomesByMonth(id: int.parse(newKey)));
                         context.read<LocalBloc>().add(GetExpensesByMonth(id: int.parse(newKey)));
                       },
-                                    ),
+                      ),
                     ),
                   );
                     
@@ -214,8 +248,8 @@ double calculateTotalExpenseAmount(List<Expense> expenseList) {
                 children: [
                   selectedTotal != null ? PieChart(
                     dataMap: {
-                      'Income' : selectedTotal?.totalIncome ?? 0,
-                      'Expense' : selectedTotal?.totalExpense ?? 0
+                      'Income' : selectedTotal!.totalIncome!,
+                      'Expense' : selectedTotal!.totalExpense!
                     },
                     animationDuration: const Duration(milliseconds: 800),
                     chartLegendSpacing: 32,
@@ -227,7 +261,7 @@ double calculateTotalExpenseAmount(List<Expense> expenseList) {
                     initialAngleInDegree: 0,
                     chartType: ChartType.ring,
                     ringStrokeWidth: 32,
-                    centerText: "Balance ${selectedTotal?.balance} ${selectedTotal?.currency}",
+                    centerText: "Balance ${((selectedTotal?.balance)! * selectedCurrency).toStringAsFixed(2)}",
                     legendOptions: const LegendOptions(
                       showLegendsInRow: false,
                       legendPosition: LegendPosition.bottom,
@@ -255,7 +289,7 @@ double calculateTotalExpenseAmount(List<Expense> expenseList) {
                     initialAngleInDegree: 0,
                     chartType: ChartType.ring,
                     ringStrokeWidth: 32,
-                    centerText: "Total income ${calculateTotalAmount(incomeList ?? [])} ${incomeList?.first.currency}",
+                    centerText: "Total income ${(calculateTotalAmount(incomeList ?? []) * selectedCurrency).toStringAsFixed(2)}",
                     legendOptions: const LegendOptions(
                       showLegendsInRow: false,
                       legendPosition: LegendPosition.bottom,
@@ -283,7 +317,7 @@ double calculateTotalExpenseAmount(List<Expense> expenseList) {
                     chartType: ChartType.ring,
                     ringStrokeWidth: 32,
                     
-                    centerText: "Total expense ${calculateTotalExpenseAmount(expensesList ?? [])} ${expensesList?.first.currency}",
+                    centerText: "Total expense ${(calculateTotalExpenseAmount(expensesList ?? []) * selectedCurrency).toStringAsFixed(2)}",
                     legendOptions: const LegendOptions(
                       showLegendsInRow: false,
                       legendPosition: LegendPosition.bottom,

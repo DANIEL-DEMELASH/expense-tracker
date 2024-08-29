@@ -245,7 +245,7 @@ class _AddIncomePageState extends State<AddIncomePage> {
                     }else{
                       context.read<LocalBloc>().add(AddIncome(income: Income(
                         amount: double.parse(_amountController.text),
-                        currency: 'ETB',
+                        currency: 'USD',
                         note: _noteController.text,
                         createdDate: _dateController.text,
                         incomeType: int.parse(selectedExpenseType!)

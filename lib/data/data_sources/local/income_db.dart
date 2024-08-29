@@ -28,19 +28,26 @@ class IncomeDb {
       )
     ''');
     
-     await database.rawInsert(
-      '''
-      INSERT INTO $tableName2 (name) VALUES (?)
-      ''',
-      ['Salary']
-    );
-
-    await database.rawInsert(
-      '''
-      INSERT INTO $tableName (amount, currency, note, createdDate, incomeType) VALUES (?, ?, ?, ?, ?)
-      ''',
-      [2000.0, 'USD', 'Monthly salary', '2024-08-28', 1]
-    );
+    await database.transaction((txn) async {
+      await txn.rawInsert(
+        '''
+        INSERT INTO $tableName2 (name) VALUES (?)
+        ''',
+        ['Salary']
+      );
+      await txn.rawInsert(
+        '''
+        INSERT INTO $tableName2 (name) VALUES (?)
+        ''',
+        ['Bonus']
+      );
+      await txn.rawInsert(
+        '''
+        INSERT INTO $tableName2 (name) VALUES (?)
+        ''',
+        ['OverTime']
+      );
+    });
   }
 
   Future<int> createIncomeType({required IncomeType incomeType}) async {

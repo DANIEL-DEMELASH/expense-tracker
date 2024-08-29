@@ -28,19 +28,28 @@ class ExpenseDb {
       )
     ''');
     
-     await database.rawInsert(
-      '''
-      INSERT INTO $tableName2 (name) VALUES (?)
-      ''',
-      ['Food']
-    );
+     await database.transaction((txn) async {
+      await txn.rawInsert(
+        '''
+        INSERT INTO $tableName2 (name) VALUES (?)
+        ''',
+        ['Food']
+      );
+      await txn.rawInsert(
+        '''
+        INSERT INTO $tableName2 (name) VALUES (?)
+        ''',
+        ['Transport']
+      );
+      await txn.rawInsert(
+        '''
+        INSERT INTO $tableName2 (name) VALUES (?)
+        ''',
+        ['Rent']
+      );
+    });
 
-    await database.rawInsert(
-      '''
-      INSERT INTO $tableName (amount, currency, note, createdDate, expenseType) VALUES (?, ?, ?, ?, ?)
-      ''',
-      [100.0, 'USD', 'Grocery shopping', '2024-08-28', 1]
-    );
+
   }
 
   Future<int> createExpense({required Expense expense}) async {
