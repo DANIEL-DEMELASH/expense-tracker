@@ -1,56 +1,56 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:interview_task/data/models/expense.dart';
-import 'package:interview_task/presentation/bloc/local_db_bloc/local_bloc.dart';
-import 'package:interview_task/presentation/bloc/local_db_bloc/local_event.dart';
-import 'package:interview_task/presentation/bloc/local_db_bloc/local_state.dart';
+import 'package:interview_task/presentation/provider/local_provider/local_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class AddExpensePage extends StatefulWidget {
   const AddExpensePage({super.key});
 
   @override
-  State<AddExpensePage> createState() => _AddExpenseState();
+  State<AddExpensePage> createState() => _AddExpensePageState();
 }
 
-class _AddExpenseState extends State<AddExpensePage> {
+class _AddExpensePageState extends State<AddExpensePage> {
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   final TextEditingController _textFieldController = TextEditingController();
-
   
   String? selectedExpenseType;
-  List<ExpenseType>? expenseTypes;
-
+  bool isVisible = false;
+  
   @override
   void dispose() {
     _dateController.dispose();
     _amountController.dispose();
     _noteController.dispose();
+    _textFieldController.dispose();
     super.dispose();
   }
   
     Future<void> _selectDate(BuildContext context) async {
-      final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(2000),
-        lastDate: DateTime(2101),
-      );
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
 
-      if (picked != null) {
-        setState(() {
-          _dateController.text = DateFormat('MMMM yyyy').format(picked);
-        });
-      }
+    if (picked != null) {
+      setState(() {
+        _dateController.text = DateFormat('MMMM yyyy').format(picked);
+      });
+    }
   }
-
+  
   
   @override
   Widget build(BuildContext context) {
+    List<ExpenseType>? expenseTypes = context.watch<LocalProvider>().expenseTypes;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -64,15 +64,7 @@ class _AddExpenseState extends State<AddExpensePage> {
         title: const Text('New Expense'),
       ),
       
-      body: BlocListener<LocalBloc, LocalState>(
-        listener: (context, state){
-          if(state is ErrorState){
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error)));
-          }
-      },
-      child: BlocBuilder<LocalBloc, LocalState>(builder: (context, state){
-        if(state is LoadedExpenseTypes){
-        return SingleChildScrollView(
+      body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: Column(
@@ -117,28 +109,27 @@ class _AddExpenseState extends State<AddExpensePage> {
                       borderRadius: BorderRadius.circular(8)
                     ),
                   ),
-                 
                 ),
                 
                 const SizedBox(height: 20),
                 
-                 TextField(
+                TextField(
                   controller: _noteController,
                   maxLines: 5,
+                  // minLines: 3,
+                  textAlign: TextAlign.start,
                   decoration: InputDecoration(
-                    labelText: 'note',
+                    labelText: 'Note',
                     hintText: 'note',
                     focusedBorder: OutlineInputBorder(
                       borderSide: const BorderSide(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(8.0)
+                      borderRadius: BorderRadius.circular(8)
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderSide: const BorderSide(color: Colors.grey),
                       borderRadius: BorderRadius.circular(8)
                     ),
-                    
                   ),
-                  
                 ),
                 
                 const SizedBox(height: 30,),
@@ -152,14 +143,14 @@ class _AddExpenseState extends State<AddExpensePage> {
                   ),
                   child: Row(
                     children: [
-                      Expanded(
+                      expenseTypes != null ? Expanded(
                         child: DropdownButton<String>(
                           value: selectedExpenseType,
                           hint: const Text('Expense Type'),
                           isExpanded: true,
                           underline: const SizedBox(),
                           dropdownColor: Colors.white,
-                          items: state.expenseTypes.map((expense) {
+                          items: expenseTypes.map((expense) {
                                       
                             return DropdownMenuItem<String>(
                               value: expense.id.toString(),
@@ -169,71 +160,71 @@ class _AddExpenseState extends State<AddExpensePage> {
                           
                           onChanged: (String? newKey) {
                             setState(() {
-                              selectedExpenseType = newKey!;
+                              selectedExpenseType = newKey;
                             });
                           },
                         ),
-                      ),
+                      ) : const CircularProgressIndicator(),
                       
                       TextButton(onPressed: (){
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return BlocProvider(
-                              create: (context) => LocalBloc(),
-                              child: BlocBuilder<LocalBloc, LocalState>(
-                                builder: (context, state ){
-                                  return AlertDialog(
-                                  title: const Text('New Expense Type'),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8)
-                                  ),
-                                  content: TextField(
-                                    controller: _textFieldController,
-                                    decoration: InputDecoration(
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(color: Colors.grey),
-                                        borderRadius: BorderRadius.circular(8)
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(color: Colors.grey),
-                                        borderRadius: BorderRadius.circular(8)
-                                      ),
-                                    ),
-                                  ),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      child: const Text('Cancel'),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                    
-                                    TextButton(
-                                      child: const Text('Save'),
-                                      onPressed: () {
-                                        if(_textFieldController.text.length > 2){
-                                          context.read<LocalBloc>().add(AddExpenseType(expenseType: ExpenseType(name: _textFieldController.text))); 
-                                          Navigator.of(context).pop();
-                                        }else{
-                                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('name must be at least 3 characters')));
-                                        }
-                                        
-                                      },
-                                    ),
-                                  ],
-                                );
-                                }
-                              ),
-                            );
-                          },
-                        );
-                      }, child: const Text('New Type'))
+                        setState(() {
+                          isVisible = !isVisible;
+                        });
+                      }, child: const Text('New Type', style: TextStyle(color: Colors.black),))
                     ],
                   ),
                 ),
+                
+                Visibility(
+                  visible: isVisible,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 25),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _textFieldController,
+                          decoration: InputDecoration(
+                            hintText: 'New Expense Type',
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(8)
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(8)
+                            ),
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 10,),
+                        
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 12, 
+                            vertical: MediaQuery.of(context).size.width / 30),
+                            backgroundColor: Colors.white,
+                            side: const BorderSide(color: Colors.grey)
+                          ),
+                          child: const Text('Add Expense Type', style: TextStyle(color: Colors.black, fontSize: 16),),
+                            onPressed: () {
+                              if(_textFieldController.text.length > 2){
+                                setState(() {
+                                  isVisible = false;
+                                });
+                                context.read<LocalProvider>().addExpenseType(ExpenseType(name: _textFieldController.text)); 
+                                _textFieldController.clear();
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Expense Type Saved', style: TextStyle(color: Colors.green),), backgroundColor: Colors.white,));
+                                }else{
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('name must be at least 3 characters', style: TextStyle(color: Colors.red),), backgroundColor: Colors.white,));
+                                }
+                              },
+                            ),
+                                      
+                            const SizedBox(height: 20)
+                      ],),
+                  )),
                   
-                const SizedBox(height: 50),
+                const SizedBox(height: 30,),
                 
                 TextButton(
                   style: TextButton.styleFrom(
@@ -243,26 +234,19 @@ class _AddExpenseState extends State<AddExpensePage> {
                     side: const BorderSide(color: Colors.grey)
                   ),
                   onPressed: (){
-                    if(_amountController.text.isEmpty || 
-                      _noteController.text.isEmpty || 
-                      _dateController.text.isEmpty || 
-                      selectedExpenseType == null){
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Error: All inputs must be filled', 
-                              style: TextStyle(color: Colors.red)
-                            ), 
-                            backgroundColor: Colors.white,));
+                    if(_amountController.text.isEmpty || _noteController.text.isEmpty || _dateController.text.isEmpty || selectedExpenseType == null){
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error: All inputs must be filled', style: TextStyle(color: Colors.red),), backgroundColor: Colors.white,));
                     }else{
-                      context.read<LocalBloc>().add(AddExpense(expense: Expense(
+                      context.read<LocalProvider>().addExpense(Expense( 
                         amount: double.parse(_amountController.text),
-                        currency: 'ETB',
+                        currency: 'USD',
                         note: _noteController.text,
                         createdDate: _dateController.text,
-                        expenseType: int.parse(selectedExpenseType!)
-                      )));
+                        expenseType: int.parse(selectedExpenseType!)));
+                      context.read<LocalProvider>().getTotalList();
+                      
                       Navigator.pop(context);
-                    }    
+                    }   
                   }, 
                   child: const Text('Save', 
                     style: TextStyle(
@@ -273,10 +257,7 @@ class _AddExpenseState extends State<AddExpensePage> {
               ],
             ),
           ),
-        );}
-        return Container();
-      }),
-      ),
+        )
     );
   }
   

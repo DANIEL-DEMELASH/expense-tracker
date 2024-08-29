@@ -1,13 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:interview_task/data/models/expense.dart';
 import 'package:interview_task/data/models/income.dart';
-import 'package:interview_task/presentation/bloc/local_db_bloc/local_bloc.dart';
-import 'package:interview_task/presentation/bloc/local_db_bloc/local_event.dart';
-import 'package:interview_task/presentation/bloc/local_db_bloc/local_state.dart';
+import 'package:interview_task/presentation/provider/local_provider/local_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class AddIncomePage extends StatefulWidget {
   const AddIncomePage({super.key});
@@ -22,14 +19,15 @@ class _AddIncomePageState extends State<AddIncomePage> {
   final TextEditingController _noteController = TextEditingController();
   final TextEditingController _textFieldController = TextEditingController();
   
-  String? selectedExpenseType;
-  List<ExpenseType>? expenseTypes;
-
+  String? selectedIncomeType;
+  bool isVisible = false;
+  
   @override
   void dispose() {
     _dateController.dispose();
     _amountController.dispose();
     _noteController.dispose();
+    _textFieldController.dispose();
     super.dispose();
   }
   
@@ -51,6 +49,8 @@ class _AddIncomePageState extends State<AddIncomePage> {
   
   @override
   Widget build(BuildContext context) {
+    List<IncomeType>? incomeTypes = context.watch<LocalProvider>().incomeTypes;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -64,13 +64,7 @@ class _AddIncomePageState extends State<AddIncomePage> {
         title: const Text('New Income'),
       ),
       
-      body: BlocListener<LocalBloc, LocalState>(
-        listener: (context, state){
-          
-      },
-      child: BlocBuilder<LocalBloc, LocalState>(builder: (context, state){
-        if(state is LoadedIncomeTypes){
-        return SingleChildScrollView(
+      body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: Column(
@@ -122,7 +116,6 @@ class _AddIncomePageState extends State<AddIncomePage> {
                 TextField(
                   controller: _noteController,
                   maxLines: 5,
-                  // minLines: 3,
                   textAlign: TextAlign.start,
                   decoration: InputDecoration(
                     labelText: 'Note',
@@ -149,14 +142,14 @@ class _AddIncomePageState extends State<AddIncomePage> {
                   ),
                   child: Row(
                     children: [
-                      Expanded(
+                      incomeTypes != null ? Expanded(
                         child: DropdownButton<String>(
-                          value: selectedExpenseType,
+                          value: selectedIncomeType,
                           hint: const Text('Income Type'),
                           isExpanded: true,
                           underline: const SizedBox(),
                           dropdownColor: Colors.white,
-                          items: state.incomeTypes.map((expense) {
+                          items: incomeTypes.map((expense) {
                                       
                             return DropdownMenuItem<String>(
                               value: expense.id.toString(),
@@ -166,69 +159,69 @@ class _AddIncomePageState extends State<AddIncomePage> {
                           
                           onChanged: (String? newKey) {
                             setState(() {
-                              selectedExpenseType = newKey!;
+                              selectedIncomeType = newKey;
                             });
                           },
                         ),
-                      ),
+                      ) : const CircularProgressIndicator(),
                       
                       TextButton(onPressed: (){
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return BlocProvider(
-                              create: (context) => LocalBloc(),
-                              child: BlocBuilder<LocalBloc, LocalState>(
-                                builder: (context, state ){
-                                  return AlertDialog(
-                                  title: const Text('New Income Type'),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8)
-                                  ),
-                                  content: TextField(
-                                    controller: _textFieldController,
-                                    decoration: InputDecoration(
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(color: Colors.grey),
-                                        borderRadius: BorderRadius.circular(8)
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(color: Colors.grey),
-                                        borderRadius: BorderRadius.circular(8)
-                                      ),
-                                    ),
-                                  ),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      child: const Text('Cancel'),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                    
-                                    TextButton(
-                                      child: const Text('Save'),
-                                      onPressed: () {
-                                        if(_textFieldController.text.length > 2){
-                                          context.read<LocalBloc>().add(AddIncomeType(incomeType: IncomeType(name: _textFieldController.text))); 
-                                          Navigator.of(context).pop();
-                                        }else{
-                                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('name must be at least 3 characters')));
-                                        }
-                                        
-                                      },
-                                    ),
-                                  ],
-                                );
-                                }
-                              ),
-                            );
-                          },
-                        );
-                      }, child: const Text('New Type'))
+                        setState(() {
+                          isVisible = !isVisible;
+                        });
+                      }, child: const Text('New Type', style: TextStyle(color: Colors.black),))
                     ],
                   ),
                 ),
+                
+                Visibility(
+                  visible: isVisible,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 25),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _textFieldController,
+                          decoration: InputDecoration(
+                            hintText: 'New Income Type',
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(8)
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: const BorderSide(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(8)
+                            ),
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 10,),
+                        
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 12, 
+                            vertical: MediaQuery.of(context).size.width / 30),
+                            backgroundColor: Colors.white,
+                            side: const BorderSide(color: Colors.grey)
+                          ),
+                          child: const Text('Add Income Type', style: TextStyle(color: Colors.black, fontSize: 16),),
+                            onPressed: () {
+                              if(_textFieldController.text.length > 2){
+                                setState(() {
+                                  isVisible = false;
+                                });
+                                context.read<LocalProvider>().addIncomeType(IncomeType(name: _textFieldController.text)); 
+                                _textFieldController.clear();
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Income Type Saved', style: TextStyle(color: Colors.green),), backgroundColor: Colors.white,));
+                              }else{
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('name must be at least 3 characters', style: TextStyle(color: Colors.red),), backgroundColor: Colors.white,));
+                              }
+                            },
+                          ),
+                                      
+                          const SizedBox(height: 20)
+                      ],),
+                  )),
                   
                 const SizedBox(height: 30,),
                 
@@ -240,16 +233,17 @@ class _AddIncomePageState extends State<AddIncomePage> {
                     side: const BorderSide(color: Colors.grey)
                   ),
                   onPressed: (){
-                    if(_amountController.text.isEmpty || _noteController.text.isEmpty || _dateController.text.isEmpty || selectedExpenseType == null){
+                    if(_amountController.text.isEmpty || _noteController.text.isEmpty || _dateController.text.isEmpty || selectedIncomeType == null){
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error: All inputs must be filled', style: TextStyle(color: Colors.red),), backgroundColor: Colors.white,));
                     }else{
-                      context.read<LocalBloc>().add(AddIncome(income: Income(
+                      context.read<LocalProvider>().addIncome(Income( 
                         amount: double.parse(_amountController.text),
                         currency: 'USD',
                         note: _noteController.text,
                         createdDate: _dateController.text,
-                        incomeType: int.parse(selectedExpenseType!)
-                      )));
+                        incomeType: int.parse(selectedIncomeType!)));
+                      context.read<LocalProvider>().getTotalList();
+                      
                       Navigator.pop(context);
                     }   
                   }, 
@@ -262,10 +256,7 @@ class _AddIncomePageState extends State<AddIncomePage> {
               ],
             ),
           ),
-        );}
-        return Container();
-      }),
-      ),
+        )
     );
   }
   

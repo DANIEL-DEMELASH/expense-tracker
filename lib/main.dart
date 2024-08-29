@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:interview_task/presentation/bloc/local_db_bloc/local_bloc.dart';
-import 'package:interview_task/presentation/bloc/local_db_bloc/local_event.dart';
-import 'package:interview_task/presentation/bloc/remote_bloc/remote_bloc.dart';
-import 'package:interview_task/presentation/bloc/remote_bloc/remote_event.dart';
 import 'package:interview_task/presentation/pages/home_page.dart';
+import 'package:interview_task/presentation/provider/local_provider/local_provider.dart';
+import 'package:interview_task/presentation/provider/remote_provider/remote_provider.dart';
 import 'package:provider/provider.dart';
 
 void main(){
@@ -28,16 +25,13 @@ class MyApp extends StatelessWidget {
       ),
       home: MultiProvider(
         providers: [
-          BlocProvider(
-            create: (context) => LocalBloc()..add(GetTotalList()),
-          ),
-          BlocProvider(
-            create: (context) => RemoteBloc()..add(GetCurrency()),
-          ),
+          ChangeNotifierProvider(create: (context) => LocalProvider()..getTotalList()),
+          ChangeNotifierProvider(create: (context) => RemoteProvider()..getCurrency())
         ],
-        child:const HomePage(),
-      ),
+        child: const MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: HomePage()),
+        ),
     );
   }
 }
-

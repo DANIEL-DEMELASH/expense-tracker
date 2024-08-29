@@ -41,12 +41,6 @@ class IncomeDb {
         ''',
         ['Bonus']
       );
-      await txn.rawInsert(
-        '''
-        INSERT INTO $tableName2 (name) VALUES (?)
-        ''',
-        ['OverTime']
-      );
     });
   }
 
